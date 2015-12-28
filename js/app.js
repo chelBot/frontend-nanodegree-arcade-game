@@ -43,23 +43,43 @@ var Player = function(x, y){
     this.initialY = y;
 };
 
+//this function should handle collisions.
+Player.prototype.update = function(dt){
+    if(this.x  === Enemy.x && this.y === Enemy.y){
+        this.x = this.initialX;
+        this.y = this.initialY;
+    }
+};
+
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
+
+
 Player.prototype.handleInput = function(input) {
+    var tempX = this.x; 
+    var tempY = this.y;
     if(input === 'left'){
-        this.x -= 20;
+        tempX -= 20;
     }
     else if(input === 'right'){
-        this.x += 20;
+        tempX += 20;
     }
-    else if(input === 'up'){
-        this.y -= 20;
+    
+    if(input === 'up'){
+        tempY -= 20;
     }
     else if(input === 'down'){
-        this.y += 20;
+        tempY += 20;
     }
 
+    //Figure out how to grab global board dimensions.
+    if(tempX <=410 && tempX >= -10){
+        this.x = tempX;
+    }
+    if(tempY <= 440 && tempY >= 0){
+        this.y = tempY;
+    }
 };
 
 // Now instantiate your objects.
