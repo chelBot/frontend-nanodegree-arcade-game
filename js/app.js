@@ -45,10 +45,15 @@ var Player = function(x, y){
 
 //this function should handle collisions.
 Player.prototype.update = function(dt){
-    if(this.x  === Enemy.x && this.y === Enemy.y){
-        this.x = this.initialX;
-        this.y = this.initialY;
+
+    for(var i in allEnemies){
+        //Use the actual dimension of bug instead of hardcoding 55. 
+        if( (this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) ){
+            this.x = this.initialX;
+            this.y = this.initialY;
+        }
     }
+    //console.log(allEnemies[1].x, allEnemies[1].y); 
 };
 
 Player.prototype.render = function() {
@@ -85,9 +90,9 @@ Player.prototype.handleInput = function(input) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var bug1 = new Enemy(0, 100, 50);
-var bug2 = new Enemy(0,50, 50);
-var bug3 = new Enemy(0, 200, 40);
+var bug1 = new Enemy(50, 100, 70);
+var bug2 = new Enemy(20,50, 70);
+var bug3 = new Enemy(0, 200, 70);
 var allEnemies = [bug1, bug2, bug3];
 
 var player = new Player(10, 400);

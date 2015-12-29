@@ -115,7 +115,9 @@ var Engine = (function(global) {
                 'images/stone-block.png',   // Row 2 of 3 of stone
                 'images/stone-block.png',   // Row 3 of 3 of stone
                 'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png'    // Row 2 of 2 of grass
+                'images/grass-block.png',    // Row 2 of 2 of grass
+
+                'images/gemBlue.png'
 
             ],
             numRows = 6,
@@ -136,8 +138,10 @@ var Engine = (function(global) {
                  * we're using them over and over.
                  */
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                
             }
         }
+        ctx.drawImage(Resources.get(rowImages[6]), Math.floor(numCols/2) * 20, Math.ceil(numRows/2) * 20);
 
         renderEntities();
     }
@@ -175,7 +179,8 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-        'images/char-princess-girl.png'
+        'images/char-princess-girl.png',
+        'images/gemBlue.png'
     ]);
     Resources.onReady(init);
 
