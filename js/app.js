@@ -32,15 +32,57 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+var deathTokenAry = [];
+//Death token class. 
+var DeathToken = function(){
+    this.sprite = 'images/gemBlueSml.png';
+
+    //The hardcored numbers here keep the death tokens within the zone region. Fix the board.
+    this.x = Math.floor((Math.random() * 5));
+    this.y = Math.floor((Math.random() * 3) + 2);
+    console.log("INITIAL LOCS: " + this.x, this.y);
+
+    var isInArray = function(array,item){
+        for(var i in array){
+            if(array[i][0] === item[0] && array[i][1] === item[1]){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    while(isInArray(deathTokenAry,[this.x, this.y])){
+        this.x = Math.floor((Math.random() * 5));
+        this.y = Math.floor((Math.random() * 3) + 2);
+    }
+
+    // for(var i in deathTokenAry){
+    //     if(this.x === deathTokenAry[i][0] && this.y === deathTokenAry[i][1]){
+    //         this.x = Math.floor((Math.random() * 5));
+    //         this.y = Math.floor((Math.random() * 3) + 2);
+    //     }
+    // }
+  
+    deathTokenAry.push([this.x, this.y]);
+    console.log(this.x, this.y);
+
+}
+
+//TODO: decide if I want to use render function or do this work in the engine
+DeathToken.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(x, y){
-    this.sprite = 'images/char-princess-girl-ghost.png';
+    this.sprite = 'images/char-princess-girl.png';
     this.x = x;
     this.y = y;
     this.initialX = x;
     this.initialY = y;
+    this.deathTokens = 0;
 };
 
 //this function should handle collisions.
@@ -48,11 +90,24 @@ Player.prototype.update = function(dt){
 
     for(var i in allEnemies){
         //Use the actual dimension of bug instead of hardcoding 55. 
+        //Check for bug collisons.
         if( (this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) ){
+            this.sprite = 'images/char-princess-girl-ghost.png';
             this.x = this.initialX;
             this.y = this.initialY;
         }
     }
+
+    //Handle ghost-girls collection of death tokens.
+    // if(this.sprite === 'images/char-princes-girl-ghost.png') {
+    //     for(this.deathTokens <= 3){
+    //        // if(this.x ===)
+    //         if(this.deathTokens === 3){
+    //             this.sprite = 'images/char-princess-girl.png';
+    //         }
+    //     }
+
+    // }
     //console.log(allEnemies[1].x, allEnemies[1].y); 
 };
 
@@ -97,6 +152,19 @@ var bug4 = new Enemy(0, 150, 43, 'purple');
 var bug5 = new Enemy(0, 190, 32, 'blue');
 var bug6 = new Enemy(0, 240, 24);
 var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6];
+
+var deathToken1 = new DeathToken();
+var deathToken2 = new DeathToken();
+var deathToken3 = new DeathToken();
+console.log(deathTokenAry);
+
+var deathTokens = [deathToken1, deathToken2, deathToken3];
+
+
+//ensure that tokens are not in the same location. Can be done in constructor? Better way?
+// for(var i in deathTokens - ){
+//     if(deathTokens)
+// }
 
 var player = new Player(10, 400);
 

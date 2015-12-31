@@ -25,6 +25,10 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
+        win.numRows = 6;
+        win.numCols = 5;
+
+
 
 
     canvas.width = 505;
@@ -117,11 +121,11 @@ var Engine = (function(global) {
                 'images/grass-block.png',   // Row 1 of 2 of grass
                 'images/grass-block.png',    // Row 2 of 2 of grass
 
-                'images/gemBlue.png'
+                'images/gemBlueSml.png'     //Death tokens.
 
             ],
-            numRows = 6,
-            numCols = 5,
+            // numRows = 6,
+            // numCols = 5,
             row, col;
 
         /* Loop through the number of rows and columns we've defined above
@@ -141,7 +145,19 @@ var Engine = (function(global) {
                 
             }
         }
-        ctx.drawImage(Resources.get(rowImages[6]), Math.floor(numCols/2) * 20, Math.ceil(numRows/2) * 20);
+        if(player.sprite == "images/char-princess-girl-ghost.png"){
+            for(var i in deathTokens){
+                //deathTokens[i].render();
+                //console.log(deathTokens[i].x, deathTokens[i].y);
+
+                ctx.drawImage(Resources.get(deathTokens[i].sprite), deathTokens[i].x * 101, deathTokens[i].y * 83);
+                
+                
+            }
+            
+        }
+        //console.log(player.sprite);
+      
 
         renderEntities();
     }
@@ -185,7 +201,7 @@ var Engine = (function(global) {
         'images/green-bug.png',
         'images/char-boy.png',
         'images/char-princess-girl.png',
-        'images/gemBlue.png',
+        'images/gemBlueSml.png',
         'images/char-princess-girl-ghost.png'
 
     ]);
