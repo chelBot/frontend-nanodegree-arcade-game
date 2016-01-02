@@ -32,16 +32,26 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-var deathTokenAry = [];
+var GhostEnemy = function(x, y, speed, color) {
+    Enemy.call(this, x, y, speed, color);
+};
+
+GhostEnemy.prototype = Object.create(Enemy.prototype);
+GhostEnemy.prototype.constructor = GhostEnemy;
+
+
+//********Is this array really necessary?
+var deathTokenLocs = [];
 //Death token class. 
 var DeathToken = function(){
     this.sprite = 'images/gemBlueSml.png';
 
-    //The hardcored numbers here keep the death tokens within the zone region. Fix the board.
+    //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
     this.x = Math.floor((Math.random() * 5));
     this.y = Math.floor((Math.random() * 3) + 2);
     console.log("INITIAL LOCS: " + this.x, this.y);
 
+    //****Should this be a helper fct outside of this scope?***
     var isInArray = function(array,item){
         for(var i in array){
             if(array[i][0] === item[0] && array[i][1] === item[1]){
@@ -49,26 +59,18 @@ var DeathToken = function(){
             }
         }
         return false;
-    }
+    };
     
-    while(isInArray(deathTokenAry,[this.x, this.y])){
+    //If location is in the deathTokenLocs, pick new coordinates.
+    while(isInArray(deathTokenLocs,[this.x, this.y])){
         this.x = Math.floor((Math.random() * 5));
         this.y = Math.floor((Math.random() * 3) + 2);
     }
-
-    // for(var i in deathTokenAry){
-    //     if(this.x === deathTokenAry[i][0] && this.y === deathTokenAry[i][1]){
-    //         this.x = Math.floor((Math.random() * 5));
-    //         this.y = Math.floor((Math.random() * 3) + 2);
-    //     }
-    // }
-  
-    deathTokenAry.push([this.x, this.y]);
+    deathTokenLocs.push([this.x, this.y]);
     console.log(this.x, this.y);
-
 }
 
-//TODO: decide if I want to use render function or do this work in the engine
+//*****Do I want to use render function or do this work in the engine?
 DeathToken.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -86,29 +88,56 @@ var Player = function(x, y){
 };
 
 //this function should handle collisions.
+var deathTokens = [];
 Player.prototype.update = function(dt){
 
     for(var i in allEnemies){
-        //Use the actual dimension of bug instead of hardcoding 55. 
+        //TODO: Use the actual dimension of bug instead of hardcoding 55. 
         //Check for bug collisons.
-        if( (this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) ){
+        if((this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) 
+            && this.sprite === 'images/char-princess-girl.png'){
             this.sprite = 'images/char-princess-girl-ghost.png';
             this.x = this.initialX;
             this.y = this.initialY;
+            var deathToken1 = new DeathToken();
+            var deathToken2 = new DeathToken();
+            var deathToken3 = new DeathToken();
+            deathTokens.push(deathToken1);
+            deathTokens.push(deathToken2);
+            deathTokens.push(deathToken3); 
         }
     }
-
+    
     //Handle ghost-girls collection of death tokens.
-    // if(this.sprite === 'images/char-princes-girl-ghost.png') {
-    //     for(this.deathTokens <= 3){
-    //        // if(this.x ===)
-    //         if(this.deathTokens === 3){
-    //             this.sprite = 'images/char-princess-girl.png';
-    //         }
-    //     }
+    //**********Why does game crash when I try to create death tokens in here? 
+    if(this.sprite === 'images/char-princess-girl-ghost.png') {
+        for(var i in allEnemyGhosts){
+            if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
+                this.x = this.initialX;
+                this.y = this.initialY;
+            }
+        }
 
-    // }
-    //console.log(allEnemies[1].x, allEnemies[1].y); 
+
+        for(var i in deathTokens){
+            // console.log(i + " " +  (101* deathTokens[i].x));
+            // console.log('spriteX: ' + this.x);
+            //*****Want tokens coordinates to be the same as sprite coordinates!!
+            
+            if((this.x >= (101*deathTokens[i].x - 20)  && this.x <= (101*deathTokens[i].x) + 20) && (this.y >= (83 *deathTokens[i].y -20)  && this.y <= (83*deathTokens[i].y + 20))){
+                this.deathTokens++;
+                delete deathTokens[i];
+                //console.log("hi");
+            }
+        }
+
+        if(this.deathTokens === 3){
+            this.sprite = 'images/char-princess-girl.png';
+            this.deathTokens = 0;
+        }
+    }
+    //console.log("num of tokens: " + this.deathTokens); 
+
 };
 
 Player.prototype.render = function() {
@@ -149,24 +178,21 @@ var bug1 = new Enemy(0, 100, 50, 'green');
 var bug2 = new Enemy(0, 50, 20, 'glowing');
 var bug3 = new Enemy(0, 300, 100, 'pink');
 var bug4 = new Enemy(0, 150, 43, 'purple');
-var bug5 = new Enemy(0, 190, 32, 'blue');
+//var bug5 = new Enemy(0, 190, 32, 'blue');
 var bug6 = new Enemy(0, 240, 24);
-var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6];
 
-var deathToken1 = new DeathToken();
-var deathToken2 = new DeathToken();
-var deathToken3 = new DeathToken();
-console.log(deathTokenAry);
+var allEnemies = [bug1, bug2, bug3, bug4, bug6];
 
-var deathTokens = [deathToken1, deathToken2, deathToken3];
+var ghostBug1 = new GhostEnemy(0, 200, 15, 'blue-ghost');
+var ghostBug2 = new GhostEnemy(0, 100, 25, 'blue-ghost');
+var ghostBug3 = new GhostEnemy(0, 250, 10, 'blue-ghost');
+var ghostBug4 = new GhostEnemy(0, 150, 50, 'blue-ghost');
+var ghostBug5 = new GhostEnemy(0, 50, 32, 'blue-ghost');
 
-
-//ensure that tokens are not in the same location. Can be done in constructor? Better way?
-// for(var i in deathTokens - ){
-//     if(deathTokens)
-// }
+var allEnemyGhosts = [ghostBug1, ghostBug2, ghostBug3, ghostBug4, ghostBug5];
 
 var player = new Player(10, 400);
+
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
