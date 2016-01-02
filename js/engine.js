@@ -101,7 +101,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        if(player.sprite === "images/char-princess-girl-ghost.png"){
+        if(player.isDead){
             allEnemyGhosts.forEach(function(ghost) {
                 ghost.update(dt);
             });
@@ -152,7 +152,7 @@ var Engine = (function(global) {
                 
             }
         }
-        if(player.sprite === "images/char-princess-girl-ghost.png"){
+        if(player.isDead){
             for(var i in deathTokens){
                 //deathTokens[i].render();
                 //console.log(deathTokens[i].x, deathTokens[i].y);
@@ -179,7 +179,7 @@ var Engine = (function(global) {
                 enemy.render();
             });
         //}
-        if(player.sprite === "images/char-princess-girl-ghost.png"){
+        if(player.isDead){
             allEnemyGhosts.forEach(function(ghost) {
                 ghost.render();
             });

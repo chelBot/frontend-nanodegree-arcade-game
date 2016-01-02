@@ -1,3 +1,6 @@
+//this function should handle collisions.
+var deathTokens = [];
+
 // Enemies our player must avoid
 var Enemy = function(x, y, speed, color) {
     // Variables applied to each of our instances go here,
@@ -32,6 +35,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+//Enemy Ghost class
 var GhostEnemy = function(x, y, speed, color) {
     Enemy.call(this, x, y, speed, color);
 };
@@ -40,13 +44,13 @@ GhostEnemy.prototype = Object.create(Enemy.prototype);
 GhostEnemy.prototype.constructor = GhostEnemy;
 
 
-//********Is this array really necessary?
 var deathTokenLocs = [];
-//Death token class. 
+//Death token class. Change Signature.
 var DeathToken = function(){
     this.sprite = 'images/gemBlueSml.png';
 
     //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
+    //TODO: uncouple this from the board. Pass rando values in.
     this.x = Math.floor((Math.random() * 5));
     this.y = Math.floor((Math.random() * 3) + 2);
     console.log("INITIAL LOCS: " + this.x, this.y);
@@ -70,7 +74,7 @@ var DeathToken = function(){
     console.log(this.x, this.y);
 }
 
-//*****Do I want to use render function or do this work in the engine?
+//NOT being used yet. Will refactor
 DeathToken.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
@@ -80,6 +84,17 @@ DeathToken.prototype.render = function() {
 // a handleInput() method.
 var Player = function(x, y){
     this.sprite = 'images/char-princess-girl.png';
+    this.isDead = false;
+    this.setIsDead = function(state){
+        if(state){
+            this.sprite = 'images/char-princess-girl-ghost.png';
+        }
+        else{
+            this.sprite = 'images/char-princess-girl.png';
+        }
+        this.isDead = state;
+    };
+
     this.x = x;
     this.y = y;
     this.initialX = x;
@@ -87,18 +102,18 @@ var Player = function(x, y){
     this.deathTokens = 0;
 };
 
-//this function should handle collisions.
-var deathTokens = [];
 Player.prototype.update = function(dt){
 
     for(var i in allEnemies){
         //TODO: Use the actual dimension of bug instead of hardcoding 55. 
         //Check for bug collisons.
         if((this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) 
-            && this.sprite === 'images/char-princess-girl.png'){
-            this.sprite = 'images/char-princess-girl-ghost.png';
+            && !this.isDead){
+            this.isDead = true;
+            this.setIsDead(this.isDead);
             this.x = this.initialX;
             this.y = this.initialY;
+
             var deathToken1 = new DeathToken();
             var deathToken2 = new DeathToken();
             var deathToken3 = new DeathToken();
@@ -108,9 +123,8 @@ Player.prototype.update = function(dt){
         }
     }
     
-    //Handle ghost-girls collection of death tokens.
-    //**********Why does game crash when I try to create death tokens in here? 
-    if(this.sprite === 'images/char-princess-girl-ghost.png') {
+    //Handle ghost-girls collection of death tokens. 
+    if(this.isDead) {
         for(var i in allEnemyGhosts){
             if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
                 this.x = this.initialX;
@@ -132,7 +146,8 @@ Player.prototype.update = function(dt){
         }
 
         if(this.deathTokens === 3){
-            this.sprite = 'images/char-princess-girl.png';
+            this.isDead = false;
+            this.setIsDead(this.isDead); 
             this.deathTokens = 0;
         }
     }
