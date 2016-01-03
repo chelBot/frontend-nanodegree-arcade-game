@@ -214,7 +214,8 @@ var Engine = (function(global) {
         'images/char-princess-girl.png',
         'images/gemBlueSml.png',
         'images/char-princess-girl-ghost.png',
-        'images/blue-ghost-bug.png'
+        'images/blue-ghost-bug.png',
+        'images/smiley_face.png'
 
 
     ]);

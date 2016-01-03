@@ -44,40 +44,59 @@ GhostEnemy.prototype = Object.create(Enemy.prototype);
 GhostEnemy.prototype.constructor = GhostEnemy;
 
 
-var deathTokenLocs = [];
+var collectibleLocs = [];
 //Death token class. Change Signature.
-var DeathToken = function(){
-    this.sprite = 'images/gemBlueSml.png';
+var Collectibles = function(x, y){
+    this.sprite = 'images/smiley_face.png';
 
     //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
-    //TODO: uncouple this from the board. Pass rando values in.
-    this.x = Math.floor((Math.random() * 5));
-    this.y = Math.floor((Math.random() * 3) + 2);
-    console.log("INITIAL LOCS: " + this.x, this.y);
-
-    //****Should this be a helper fct outside of this scope?***
-    var isInArray = function(array,item){
-        for(var i in array){
-            if(array[i][0] === item[0] && array[i][1] === item[1]){
-                return true;
-            }
-        }
-        return false;
-    };
-    
-    //If location is in the deathTokenLocs, pick new coordinates.
-    while(isInArray(deathTokenLocs,[this.x, this.y])){
+    if(x && y){
+        this.x = x;
+        this.y = y;
+    }
+    else{
         this.x = Math.floor((Math.random() * 5));
         this.y = Math.floor((Math.random() * 3) + 2);
+        console.log("INITIAL LOCS: " + this.x, this.y);
+
+        //****Should this be a helper fct outside of this scope?***
+        var isInArray = function(array,item){
+            for(var i in array){
+                if(array[i][0] === item[0] && array[i][1] === item[1]){
+                    return true;
+                }
+            }
+            return false;
+        };
+    
+        //If location is in the collectibleLocs, pick new coordinates.
+        while(isInArray(collectibleLocs,[this.x, this.y])){
+            this.x = Math.floor((Math.random() * 5));
+            this.y = Math.floor((Math.random() * 3) + 2);
+        }
     }
-    deathTokenLocs.push([this.x, this.y]);
-    console.log(this.x, this.y);
-}
+    collectibleLocs.push([this.x, this.y]);
+    //console.log("token array " + collectibleLocs);
+};
 
 //NOT being used yet. Will refactor
-DeathToken.prototype.render = function() {
+Collectibles.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
+
+var DeathToken = function(x, y){
+    Collectibles.call(this, x, y);
+    //TODO: explore if I want this within constructor or outside.
+    this.sprite = 'images/gemBlueSml.png';
+};
+DeathToken.prototype = Object.create(Collectibles.prototype);
+DeathToken.prototype.constructor = DeathToken;
+
+var token = new DeathToken(4,4);
+var token2 = new DeathToken(3,4);
+deathTokens.push(token, token2);
+
+
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -122,7 +141,6 @@ Player.prototype.update = function(dt){
             deathTokens.push(deathToken3); 
         }
     }
-    
     //Handle ghost-girls collection of death tokens. 
     if(this.isDead) {
         for(var i in allEnemyGhosts){
@@ -155,6 +173,7 @@ Player.prototype.update = function(dt){
 
 };
 
+console.log(deathTokens);
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
