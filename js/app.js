@@ -44,6 +44,14 @@ GhostEnemy.prototype = Object.create(Enemy.prototype);
 GhostEnemy.prototype.constructor = GhostEnemy;
 
 
+var HellBug = function(x, y, speed, color){
+    Enemy.call(this, x, y, speed, color);
+};
+
+HellBug.prototype = Object.create(Enemy.prototype);
+HellBug.prototype.constructor = HellBug;
+
+//********************************************************************************
 var collectibleLocs = [];
 //Death token class. Change Signature.
 var Collectibles = function(x, y){
@@ -96,7 +104,7 @@ var token = new DeathToken(4,4);
 var token2 = new DeathToken(3,4);
 deathTokens.push(token, token2);
 
-
+//*************************************************************************
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -104,9 +112,11 @@ deathTokens.push(token, token2);
 var Player = function(x, y){
     this.sprite = 'images/char-princess-girl.png';
     this.isDead = false;
+    this.deathAlert = 0;
     this.setIsDead = function(state){
         if(state){
             this.sprite = 'images/char-princess-girl-ghost.png';
+
         }
         else{
             this.sprite = 'images/char-princess-girl.png';
@@ -119,7 +129,33 @@ var Player = function(x, y){
     this.initialX = x;
     this.initialY = y;
     this.deathTokens = 0;
+    
+    this.lose = false;
 };
+
+var count = 10;
+var timer = function(){
+    setInterval(myTimer, 1000);
+}
+
+//****************************************************************************
+var myTimer = function() {
+    if(count >= 0){
+        document.getElementById("fatherTime").innerHTML = count;
+    }
+    else{
+
+        document.getElementById("youLose").innerHTML = "You Die!"; 
+        player.lose = true;
+        stopTimer();
+    }
+     count--;
+}
+
+var stopTimer = function(){
+    clearInterval(timer);
+}
+//***************************************************************************
 
 Player.prototype.update = function(dt){
 
@@ -141,12 +177,26 @@ Player.prototype.update = function(dt){
             deathTokens.push(deathToken3); 
         }
     }
+
     //Handle ghost-girls collection of death tokens. 
     if(this.isDead) {
+        this.deathAlert++;
+        if(this.deathAlert === 1){
+            myTimer();
+            timer();
+        }
         for(var i in allEnemyGhosts){
             if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
                 this.x = this.initialX;
                 this.y = this.initialY;
+            }
+        }
+        if(this.lose){
+            for(var i in allHellBugs){
+                if((this.x >= allHellBugs[i].x -55 && this.x <= allHellBugs[i].x + 55) && (this.y >= allHellBugs[i].y - 55 && this.y <= allHellBugs[i].y + 55)){
+                    this.x = this.initialX;
+                    this.y = this.initialY;
+                }
             }
         }
 
@@ -168,7 +218,21 @@ Player.prototype.update = function(dt){
             this.setIsDead(this.isDead); 
             this.deathTokens = 0;
         }
+       
     }
+    if(count === 0){
+        this.lose = true;
+        this.isDead = true;
+
+        console.log("dead");
+    }
+    if(!this.isDead){
+        this.deathAlert = 0;
+        count = 10;
+        document.getElementById("fatherTime").innerHTML = "";
+
+    }
+
     //console.log("num of tokens: " + this.deathTokens); 
 
 };
@@ -176,6 +240,7 @@ Player.prototype.update = function(dt){
 console.log(deathTokens);
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    //ctx.drawImage(Resources.get('images/reaperGhost.png'), this.initialX, this.initialY);
 };
 
 
@@ -225,7 +290,24 @@ var ghostBug5 = new GhostEnemy(0, 50, 32, 'blue-ghost');
 
 var allEnemyGhosts = [ghostBug1, ghostBug2, ghostBug3, ghostBug4, ghostBug5];
 
+var hellBug1 = new HellBug(0, 100, 50, 'hell');
+var hellBug2 = new HellBug(0, 50, 20, 'hell');
+var hellBug3 = new HellBug(0, 300, 100, 'hell');
+var hellBug4 = new HellBug(0, 150, 13, 'hell');
+var hellBug5 = new HellBug(0, 160, 43, 'hell');
+var hellBug6 = new HellBug(0, 180, 83, 'hell');
+var hellBug7 = new HellBug(0, 190, 23, 'hell');
+var hellBug8 = new HellBug(0, 170, 53, 'hell');
+var hellBug9 = new HellBug(0, 180, 93, 'hell');
+var hellBug10 = new HellBug(0, 120, 103, 'hell');
+var hellBug11 = new HellBug(0, 370, 100, 'hell');
+var hellBug12 = new HellBug(0, 270, 0, 'hell');
+var hellBug13 = new HellBug(0, 470, 150, 'hell');
+
+var allHellBugs = [hellBug1, hellBug2, hellBug3, hellBug4, hellBug5, hellBug6, hellBug7, hellBug8, hellBug9, hellBug10, hellBug11, hellBug12, hellBug13];
+
 var player = new Player(10, 400);
+
 
 
 // This listens for key presses and sends the keys to your
@@ -237,6 +319,41 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+
+
+// if(player.isDead){
+//     timer();
+// }
+
+// var time = Date.now();
+// var running = setInterval(run, 10); // Save this so we can clear/cancel it later
+
+// setTimeout(function() {        // Set a timer
+//   clearInterval(running);      // Stop the running loop
+//   alert('Game over!');         // Let the user know, do other stuff here
+// }, 30000); 
+
+// var timer;
+// var output;
+// var game;
+
+// function init(){
+//     game = new Scene();
+//     output = document.getElementById("output");
+//     timer = new Timer();
+//     timer.reset();
+//     game.start();
+// } // end init
+
+// function update(){
+//     game.hide();
+//     currentTime = timer.getElapsedTime();
+//     output.innerHTML = currentTime;
+// } // end update
+
+// function reset(){
+//     timer.reset();
+// } 

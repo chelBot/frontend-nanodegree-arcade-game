@@ -2,3 +2,28 @@ body {
     text-align: center;
     background-color: gray;
 }
+#canDiv{
+	position: relative;
+	margin:auto;
+	width: 505px;
+	height: 606px;
+}
+#fatherTime{
+	position: absolute;
+	/*top: 80px;
+    right: 0;*/
+	width: 100px;
+	height: 100px;
+	top: 550px;
+	left: 400px;
+
+}
+#youLose{
+	position:absolute;
+	width: 400px;
+	height: 100px;
+	top: 160px;
+	left: 50px;
+	font-size: 60px;
+	color: red;
+}

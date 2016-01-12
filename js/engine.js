@@ -21,20 +21,31 @@ var Engine = (function(global) {
      */
     var doc = global.document,
         win = global.window,
-        canvas = doc.createElement('canvas'),
-        ctx = canvas.getContext('2d'),
+        canvas,
+        ctx,
+        lastTime,
 
-        lastTime;
+        loadCanvas = function() {
+            canvas = document.createElement('canvas');
+            ctx = canvas.getContext('2d')
+            //div = document.createElement('div'); 
+            //div.id = "canvas";
+            canvas.id     = "canvas";
+            canvas.width  = 505;
+            canvas.height = 606;
+            win.sharedCanvas = canvas;
+            //doc.body.appendChild(canDiv);
+            canDiv.appendChild(canvas);
+
+        };
+        loadCanvas();
 
         //****How to make these values global? Need sharedBoard.
         win.numRows = 6;
         win.numCols = 5;
 
-        win.sharedCanvas = canvas;
+        // win.sharedCanvas = canvas;
 
-        canvas.width = 505;
-        canvas.height = 606;
-        doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -106,6 +117,11 @@ var Engine = (function(global) {
                 ghost.update(dt);
             });
         }
+        if(player.lose){
+            allHellBugs.forEach(function(hellBug) {
+                hellBug.update(dt);
+            });
+        }
 
         player.update();
     }
@@ -120,13 +136,14 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-        var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png',    // Row 2 of 2 of grass
+        if(player.lose){
+            var rowImages = [
+                'images/hell-water-block.png',   // Top row is water
+                'images/hell-stone-block.png',   // Row 1 of 3 of stone
+                'images/hell-stone-block.png',   // Row 2 of 3 of stone
+                'images/hell-stone-block.png',   // Row 3 of 3 of stone
+                'images/hell-stone-block.png',   // Row 1 of 2 of grass
+                'images/hell-stone-block.png',    // Row 2 of 2 of grass
 
                 'images/gemBlueSml.png'     //Death tokens.
 
@@ -134,6 +151,21 @@ var Engine = (function(global) {
             // numRows = 6,
             // numCols = 5,
             row, col;
+
+        }
+        else{
+        var rowImages = [
+                'images/water-block.png',   // Top row is water
+                'images/stone-block.png',   // Row 1 of 3 of stone
+                'images/stone-block.png',   // Row 2 of 3 of stone
+                'images/stone-block.png',   // Row 3 of 3 of stone
+                'images/grass-block.png',   // Row 1 of 2 of grass
+                'images/grass-block.png',    // Row 2 of 2 of grass
+            ],
+            // numRows = 6,
+            // numCols = 5,
+            row, col;
+        }
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
@@ -152,7 +184,7 @@ var Engine = (function(global) {
                 
             }
         }
-        if(player.isDead){
+        if(player.isDead && !player.lose){
             for(var i in deathTokens){
                 //deathTokens[i].render();
                 //console.log(deathTokens[i].x, deathTokens[i].y);
@@ -175,10 +207,17 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
         //if(player.sprite === "images/char-princess-girl.png"){
+        if(!player.lose){
             allEnemies.forEach(function(enemy) {
                 enemy.render();
             });
+        }
         //}
+        if(player.lose){
+            allHellBugs.forEach(function(hellBug) {
+                hellBug.render();
+            });
+        }
         if(player.isDead){
             allEnemyGhosts.forEach(function(ghost) {
                 ghost.render();
@@ -215,7 +254,13 @@ var Engine = (function(global) {
         'images/gemBlueSml.png',
         'images/char-princess-girl-ghost.png',
         'images/blue-ghost-bug.png',
-        'images/smiley_face.png'
+        'images/smiley_face.png',
+        'images/reaperGhost.png',
+        'images/hell-stone-block.png',
+        'images/hell-water-block.png',
+        'images/hell-grass-block.png',
+        'images/hell-bug.png'
+
 
 
     ]);
@@ -227,3 +272,4 @@ var Engine = (function(global) {
      */
     global.ctx = ctx;
 })(this);
+
