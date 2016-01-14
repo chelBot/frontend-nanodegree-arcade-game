@@ -117,10 +117,11 @@ var Engine = (function(global) {
                 ghost.update(dt);
             });
         }
-        if(player.lose){
+        if(player.hasLost){
             allHellBugs.forEach(function(hellBug) {
                 hellBug.update(dt);
             });
+            reaper.update(player.x, player.y);
         }
 
         player.update();
@@ -136,55 +137,96 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-        if(player.lose){
-            var rowImages = [
-                'images/hell-water-block.png',   // Top row is water
-                'images/hell-stone-block.png',   // Row 1 of 3 of stone
-                'images/hell-stone-block.png',   // Row 2 of 3 of stone
-                'images/hell-stone-block.png',   // Row 3 of 3 of stone
-                'images/hell-stone-block.png',   // Row 1 of 2 of grass
-                'images/hell-stone-block.png',    // Row 2 of 2 of grass
+       
+        var rowImagesHell = [
+            'images/hell-water-block.png', 
+            'images/hell-stone-block.png',  
+            'images/hell-stone-block.png',   
+            'images/hell-stone-block.png',   
+            'images/hell-stone-block.png',   
+            'images/hell-stone-block.png'   
+            
+         
+        ],
 
-                'images/gemBlueSml.png'     //Death tokens.
-
-            ],
+        rowImagesWin = [
+            'images/Dirt-Block.png',   
+            'images/Stone-Block-Tall.png',
+            'images/Dirt-Block.png',    
+            'images/Dirt-Block.png',   
+            'images/Dirt-Block.png',   
+            'images/Dirt-Block.png',
+            'images/Door-Tall-Closed.png',
+            'images/char-boy.png'
+        ],
             // numRows = 6,
             // numCols = 5,
-            row, col;
+            // row, col;
 
-        }
-        else{
-        var rowImages = [
-                'images/water-block.png',   // Top row is water
-                'images/stone-block.png',   // Row 1 of 3 of stone
-                'images/stone-block.png',   // Row 2 of 3 of stone
-                'images/stone-block.png',   // Row 3 of 3 of stone
-                'images/grass-block.png',   // Row 1 of 2 of grass
-                'images/grass-block.png',    // Row 2 of 2 of grass
-            ],
+        // }
+        //player is dead; render hell
+         rowImages = [
+            'images/water-block.png',   // Top row is water
+            'images/stone-block.png',   // Row 1 of 3 of stone
+            'images/stone-block.png',   // Row 2 of 3 of stone
+            'images/stone-block.png',   // Row 3 of 3 of stone
+            'images/grass-block.png',   // Row 1 of 2 of grass
+            'images/grass-block.png',    // Row 2 of 2 of grass
+        ],
             // numRows = 6,
             // numCols = 5,
-            row, col;
-        }
+        row, col;
+       
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-        for (row = 0; row < numRows; row++) {
-            for (col = 0; col < numCols; col++) {
-                /* The drawImage function of the canvas' context element
-                 * requires 3 parameters: the image to draw, the x coordinate
-                 * to start drawing and the y coordinate to start drawing.
-                 * We're using our Resources helpers to refer to our images
-                 * so that we get the benefits of caching these images, since
-                 * we're using them over and over.
-                 */
-                ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
-                
+        if(!player.hasLost && !player.hasKey){
+            for (row = 0; row < numRows; row++) {
+                for (col = 0; col < numCols; col++) {
+                    /* The drawImage function of the canvas' context element
+                     * requires 3 parameters: the image to draw, the x coordinate
+                     * to start drawing and the y coordinate to start drawing.
+                     * We're using our Resources helpers to refer to our images
+                     * so that we get the benefits of caching these images, since
+                     * we're using them over and over.
+                     */
+                    ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                }
             }
         }
-        if(player.isDead && !player.lose){
+        else if(player.hasKey){
+            ctx.drawImage(Resources.get(rowImagesWin[1]), 1*101, 0*83);
+            ctx.drawImage(Resources.get(rowImagesWin[1]), 3*101, 0*83);
+            for (row = 0; row < numRows; row++){
+                for (col = 0; col < numCols; col++){
+                    if(!(row === 0 && (col === 1 || col === 3)) && !(row ===1 && col === 2)){
+                    ctx.drawImage(Resources.get(rowImagesWin[row]), col*101, row*83);
+                    }
+                }
+            }
+           ctx.drawImage(Resources.get(rowImagesWin[7]), 2*101, 0*83);
+           ctx.drawImage(Resources.get(rowImagesWin[6]), 2*101, 1*83);
+
+        }
+        
+         else{
+            for (row = 0; row < numRows; row++) {
+                for (col = 0; col < numCols; col++) {
+                    /* The drawImage function of the canvas' context element
+                     * requires 3 parameters: the image to draw, the x coordinate
+                     * to start drawing and the y coordinate to start drawing.
+                     * We're using our Resources helpers to refer to our images
+                     * so that we get the benefits of caching these images, since
+                     * we're using them over and over.
+                     */
+                    ctx.drawImage(Resources.get(rowImagesHell[row]), col * 101, row * 83);
+                }
+            }
+        }
+      
+        if(player.isDead && !player.hasLost){
             for(var i in deathTokens){
                 //deathTokens[i].render();
                 //console.log(deathTokens[i].x, deathTokens[i].y);
@@ -193,7 +235,6 @@ var Engine = (function(global) {
             }   
         }
         //console.log(player.sprite);
-      
 
         renderEntities();
     }
@@ -207,23 +248,26 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
         //if(player.sprite === "images/char-princess-girl.png"){
-        if(!player.lose){
+        if(!player.hasLost && !player.hasKey){
             allEnemies.forEach(function(enemy) {
                 enemy.render();
             });
         }
-        //}
-        if(player.lose){
+        if(!player.hasLost && !player.isDead && keys[0] !== undefined){
+            keys[0].render();
+        }
+        if(player.hasLost){
             allHellBugs.forEach(function(hellBug) {
                 hellBug.render();
+                
             });
+            reaper.render();
         }
         if(player.isDead){
             allEnemyGhosts.forEach(function(ghost) {
                 ghost.render();
             });
         }
-
         player.render();
     }
 
@@ -252,6 +296,7 @@ var Engine = (function(global) {
         'images/char-boy.png',
         'images/char-princess-girl.png',
         'images/gemBlueSml.png',
+        'images/KeySml.png',
         'images/char-princess-girl-ghost.png',
         'images/blue-ghost-bug.png',
         'images/smiley_face.png',
@@ -259,7 +304,11 @@ var Engine = (function(global) {
         'images/hell-stone-block.png',
         'images/hell-water-block.png',
         'images/hell-grass-block.png',
-        'images/hell-bug.png'
+        'images/hell-bug.png',
+        'images/Dirt-Block.png',
+        'images/Door-Tall-Closed.png',
+        'images/Stone-Block-Tall.png'
+
 
 
 

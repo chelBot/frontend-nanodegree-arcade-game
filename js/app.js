@@ -1,5 +1,6 @@
 //this function should handle collisions.
 var deathTokens = [];
+var keys = [];
 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed, color) {
@@ -29,6 +30,25 @@ Enemy.prototype.update = function(dt) {
     }
 
 };
+//****************************************************************************
+
+
+var Reaper = function(x,y){
+    this.sprite = 'images/reaperGhost.png';
+    this.x = x;
+    this.y = y;
+    this.initialX= x;
+    this.initialY = y;
+};
+Reaper.prototype.update = function(playerX, playerY){
+    this.x = playerX + 80;
+    this.y = playerY;
+};
+Reaper.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+//****************************************************************************
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -54,7 +74,7 @@ HellBug.prototype.constructor = HellBug;
 //********************************************************************************
 var collectibleLocs = [];
 //Death token class. Change Signature.
-var Collectibles = function(x, y){
+var Collectible = function(x, y){
     this.sprite = 'images/smiley_face.png';
 
     //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
@@ -85,26 +105,48 @@ var Collectibles = function(x, y){
     }
     collectibleLocs.push([this.x, this.y]);
     //console.log("token array " + collectibleLocs);
+    this.collected = false;
 };
 
 //NOT being used yet. Will refactor
-Collectibles.prototype.render = function() {
+Collectible.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+
 var DeathToken = function(x, y){
-    Collectibles.call(this, x, y);
+    Collectible.call(this, x, y);
     //TODO: explore if I want this within constructor or outside.
     this.sprite = 'images/gemBlueSml.png';
 };
-DeathToken.prototype = Object.create(Collectibles.prototype);
+DeathToken.prototype = Object.create(Collectible.prototype);
 DeathToken.prototype.constructor = DeathToken;
 
-var token = new DeathToken(4,4);
-var token2 = new DeathToken(3,4);
-deathTokens.push(token, token2);
+var key = new Collectible( 4*101, 1*83);
+key.sprite = 'images/KeySml.png';
+keys.push(key);
 
-//*************************************************************************
+//****************************************************************************
+var count = 10;
+var timer = function(){
+    setInterval(myTimer, 1000);
+}
+var myTimer = function() {
+    if(count >= 0){
+        document.getElementById("fatherTime").innerHTML = count;
+    }
+    else{
+
+        document.getElementById("youhasLost").innerHTML = "You Die!"; 
+        player.hasLost = true;
+        stopTimer();
+    }
+     count--;
+}
+var stopTimer = function(){
+    clearInterval(timer);
+}
+//****************************************************************************
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -130,32 +172,9 @@ var Player = function(x, y){
     this.initialY = y;
     this.deathTokens = 0;
     
-    this.lose = false;
+    this.hasKey = false;
+    this.hasLost = false;
 };
-
-var count = 10;
-var timer = function(){
-    setInterval(myTimer, 1000);
-}
-
-//****************************************************************************
-var myTimer = function() {
-    if(count >= 0){
-        document.getElementById("fatherTime").innerHTML = count;
-    }
-    else{
-
-        document.getElementById("youLose").innerHTML = "You Die!"; 
-        player.lose = true;
-        stopTimer();
-    }
-     count--;
-}
-
-var stopTimer = function(){
-    clearInterval(timer);
-}
-//***************************************************************************
 
 Player.prototype.update = function(dt){
 
@@ -177,8 +196,20 @@ Player.prototype.update = function(dt){
             deathTokens.push(deathToken3); 
         }
     }
+    if(!player.hasLost && !player.isDead){
+        if((this.x >= (key.x - 20)  && this.x <= (key.x) + 20) && (this.y >= (key.y -20)  && this.y <= (key.y + 20))){    
+               console.log(key.x, key.y);
+               this.hasKey = true;
+               delete keys[0]; 
+        }
+    }
+    if(player.hasKey){
+        for(var i in allEnemies){
+            delete allEnemies[i];
+        }
+    }
 
-    //Handle ghost-girls collection of death tokens. 
+    //Handle ghost-girls collection of death tokens and timer. 
     if(this.isDead) {
         this.deathAlert++;
         if(this.deathAlert === 1){
@@ -191,7 +222,7 @@ Player.prototype.update = function(dt){
                 this.y = this.initialY;
             }
         }
-        if(this.lose){
+        if(this.hasLost){
             for(var i in allHellBugs){
                 if((this.x >= allHellBugs[i].x -55 && this.x <= allHellBugs[i].x + 55) && (this.y >= allHellBugs[i].y - 55 && this.y <= allHellBugs[i].y + 55)){
                     this.x = this.initialX;
@@ -220,8 +251,8 @@ Player.prototype.update = function(dt){
         }
        
     }
-    if(count === 0){
-        this.lose = true;
+    if(count === -1){
+        this.hasLost = true;
         this.isDead = true;
 
         console.log("dead");
@@ -273,14 +304,13 @@ Player.prototype.handleInput = function(input) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var bug1 = new Enemy(0, 100, 50, 'green');
-var bug2 = new Enemy(0, 50, 20, 'glowing');
-var bug3 = new Enemy(0, 300, 100, 'pink');
-var bug4 = new Enemy(0, 150, 43, 'purple');
-//var bug5 = new Enemy(0, 190, 32, 'blue');
-var bug6 = new Enemy(0, 240, 24);
+var bug1 = new Enemy(0, 100, 50);
+var bug2 = new Enemy(0, 50, 20, 'green');
+var bug3 = new Enemy(0, 150, 43, 'purple');
+var bug4 = new Enemy(0, 190, 32, 'green');
+var bug5 = new Enemy(0, 240, 24);
 
-var allEnemies = [bug1, bug2, bug3, bug4, bug6];
+var allEnemies = [bug1, bug2, bug3, bug4, bug5];
 
 var ghostBug1 = new GhostEnemy(0, 200, 15, 'blue-ghost');
 var ghostBug2 = new GhostEnemy(0, 100, 25, 'blue-ghost');
@@ -300,14 +330,21 @@ var hellBug7 = new HellBug(0, 190, 23, 'hell');
 var hellBug8 = new HellBug(0, 170, 53, 'hell');
 var hellBug9 = new HellBug(0, 180, 93, 'hell');
 var hellBug10 = new HellBug(0, 120, 103, 'hell');
-var hellBug11 = new HellBug(0, 370, 100, 'hell');
-var hellBug12 = new HellBug(0, 270, 0, 'hell');
-var hellBug13 = new HellBug(0, 470, 150, 'hell');
+var hellBug11 = new HellBug(10, 370, 100, 'hell');
+var hellBug12 = new HellBug(20, 270, 10, 'hell');
+var hellBug13 = new HellBug(30, 370, 15, 'hell');
+var hellBug14 = new HellBug(10, 280, 15, 'hell');
+var hellBug15 = new HellBug(0, 447, 50, 'hell');
+var hellBug16 = new HellBug(0, 19, 60, 'hell');
+var hellBug17 = new HellBug(0, 40, 18, 'hell');
+var hellBug18 = new HellBug(0, 100, 19, 'hell');
+var hellBug19 = new HellBug(0, 300, 70, 'hell');
 
-var allHellBugs = [hellBug1, hellBug2, hellBug3, hellBug4, hellBug5, hellBug6, hellBug7, hellBug8, hellBug9, hellBug10, hellBug11, hellBug12, hellBug13];
+var allHellBugs = [hellBug1, hellBug2, hellBug3, hellBug4, hellBug5, hellBug6, hellBug7, hellBug8, hellBug9, hellBug10, hellBug11, hellBug12, hellBug13, hellBug14, hellBug15, hellBug16, hellBug17, hellBug18, hellBug19];
 
 var player = new Player(10, 400);
 
+var reaper = new Reaper(90, 400);
 
 
 // This listens for key presses and sends the keys to your
