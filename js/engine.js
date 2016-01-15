@@ -157,8 +157,11 @@ var Engine = (function(global) {
             'images/Dirt-Block.png',   
             'images/Dirt-Block.png',
             'images/Door-Tall-Closed.png',
-            'images/char-boy.png'
+            'images/char-boy.png',
+            'images/Door-Tall-Open.png',
+            'images/Heart.png'
         ],
+
             // numRows = 6,
             // numCols = 5,
             // row, col;
@@ -183,6 +186,7 @@ var Engine = (function(global) {
          * portion of the "grid"
          */
         if(!player.hasLost && !player.hasKey){
+            ctx.clearRect(0,0, canvas.width, canvas.height);
             for (row = 0; row < numRows; row++) {
                 for (col = 0; col < numCols; col++) {
                     /* The drawImage function of the canvas' context element
@@ -197,18 +201,26 @@ var Engine = (function(global) {
             }
         }
         else if(player.hasKey){
+            ctx.clearRect(0,0, canvas.width, canvas.height);
             ctx.drawImage(Resources.get(rowImagesWin[1]), 1*101, 0*83);
             ctx.drawImage(Resources.get(rowImagesWin[1]), 3*101, 0*83);
             for (row = 0; row < numRows; row++){
                 for (col = 0; col < numCols; col++){
                     if(!(row === 0 && (col === 1 || col === 3)) && !(row ===1 && col === 2)){
-                    ctx.drawImage(Resources.get(rowImagesWin[row]), col*101, row*83);
+                        ctx.drawImage(Resources.get(rowImagesWin[row]), col*101, row*83);
                     }
                 }
             }
-           ctx.drawImage(Resources.get(rowImagesWin[7]), 2*101, 0*83);
-           ctx.drawImage(Resources.get(rowImagesWin[6]), 2*101, 1*83);
-
+            if(!player.hasWon){
+                ctx.drawImage(Resources.get(rowImagesWin[7]), 2*101, 0*83);
+                ctx.drawImage(Resources.get(rowImagesWin[6]), 2*101, 1*83);
+            }
+           else{
+                ctx.drawImage(Resources.get(rowImagesWin[8]), 2*101, 1*83);
+                ctx.drawImage(Resources.get(rowImagesWin[7]), player.x + 80, player.y);
+                ctx.drawImage(Resources.get(rowImagesWin[9]), player.x +40, player.y - 50);
+                document.getElementById("youWin").innerHTML = "You Saved Char Boy! You Win.";
+           }
         }
         
          else{
@@ -307,7 +319,9 @@ var Engine = (function(global) {
         'images/hell-bug.png',
         'images/Dirt-Block.png',
         'images/Door-Tall-Closed.png',
-        'images/Stone-Block-Tall.png'
+        'images/Stone-Block-Tall.png',
+        'images/Door-Tall-Open.png',
+        'images/Heart.png'
 
 
 

@@ -30,25 +30,6 @@ Enemy.prototype.update = function(dt) {
     }
 
 };
-//****************************************************************************
-
-
-var Reaper = function(x,y){
-    this.sprite = 'images/reaperGhost.png';
-    this.x = x;
-    this.y = y;
-    this.initialX= x;
-    this.initialY = y;
-};
-Reaper.prototype.update = function(playerX, playerY){
-    this.x = playerX + 80;
-    this.y = playerY;
-};
-Reaper.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-//****************************************************************************
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
@@ -70,6 +51,23 @@ var HellBug = function(x, y, speed, color){
 
 HellBug.prototype = Object.create(Enemy.prototype);
 HellBug.prototype.constructor = HellBug;
+
+
+//****************************************************************************
+var Reaper = function(x,y){
+    this.sprite = 'images/reaperGhost.png';
+    this.x = x;
+    this.y = y;
+    this.initialX= x;
+    this.initialY = y;
+};
+Reaper.prototype.update = function(playerX, playerY){
+    this.x = playerX + 80;
+    this.y = playerY;
+};
+Reaper.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
 
 //********************************************************************************
 var collectibleLocs = [];
@@ -122,7 +120,8 @@ var DeathToken = function(x, y){
 DeathToken.prototype = Object.create(Collectible.prototype);
 DeathToken.prototype.constructor = DeathToken;
 
-var key = new Collectible( 4*101, 1*83);
+//*************TODO: figure out why positioning isn't working correctly************
+var key = new Collectible( 2*101, 1*83);
 key.sprite = 'images/KeySml.png';
 keys.push(key);
 
@@ -137,7 +136,7 @@ var myTimer = function() {
     }
     else{
 
-        document.getElementById("youhasLost").innerHTML = "You Die!"; 
+        document.getElementById("youLose").innerHTML = "You Die!"; 
         player.hasLost = true;
         stopTimer();
     }
@@ -173,11 +172,12 @@ var Player = function(x, y){
     this.deathTokens = 0;
     
     this.hasKey = false;
+    this.hasWon = false;
     this.hasLost = false;
+
 };
 
 Player.prototype.update = function(dt){
-
     for(var i in allEnemies){
         //TODO: Use the actual dimension of bug instead of hardcoding 55. 
         //Check for bug collisons.
@@ -207,9 +207,12 @@ Player.prototype.update = function(dt){
         for(var i in allEnemies){
             delete allEnemies[i];
         }
+        if((this.x >= 2*101 - 50 && this.x <= 3*101 -100) && (this.y <= 1*83 + 50)){
+            this.hasWon = true;
+        }
     }
 
-    //Handle ghost-girls collection of death tokens and timer. 
+    //Handle ghost-girls collection of death tokens and death timer. 
     if(this.isDead) {
         this.deathAlert++;
         if(this.deathAlert === 1){
@@ -294,10 +297,17 @@ Player.prototype.handleInput = function(input) {
 
     //Figure out how to grab global board dimensions.
     if(tempX <=410 && tempX >= -10){
-        this.x = tempX;
+            this.x = tempX;
     }
-    if(tempY <= 440 && tempY >= 0){
-        this.y = tempY;
+    if(!this.hasKey){
+        if(tempY <= 440 && tempY >= 0){
+            this.y = tempY;
+        }
+    }
+    else{
+        if(tempY <= 440 && tempY >= 100){
+            this.y = tempY;
+        }
     }
 };
 
@@ -309,8 +319,9 @@ var bug2 = new Enemy(0, 50, 20, 'green');
 var bug3 = new Enemy(0, 150, 43, 'purple');
 var bug4 = new Enemy(0, 190, 32, 'green');
 var bug5 = new Enemy(0, 240, 24);
+var bug6 = new Enemy(40, 175, 64);
 
-var allEnemies = [bug1, bug2, bug3, bug4, bug5];
+var allEnemies = [bug1, bug2, bug3, bug4, bug5, bug6];
 
 var ghostBug1 = new GhostEnemy(0, 200, 15, 'blue-ghost');
 var ghostBug2 = new GhostEnemy(0, 100, 25, 'blue-ghost');
