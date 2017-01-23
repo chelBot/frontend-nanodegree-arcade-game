@@ -1,6 +1,7 @@
 body {
     text-align: center;
-    background-color: gray;
+    background-color: black;
+
 }
 #canDiv{
 	position: relative;
@@ -10,25 +11,14 @@ body {
 }
 #fatherTime{
 	position: absolute;
-	/*top: 80px;
-    right: 0;*/
-	width: 50px;
-	height: 50px;
-	top: 550px;
-	left: 400px;
+	top: 370px;
+  left: 412px;
+  font-size: 100px;
+	color: black;
+  font-family: 'Press Start 2P', courier;
 
 }
-#youWin{
-	position:absolute;
-	width: 400px;
-	height: 100px;
-	top: 160px;
-	left: 50px;
-	font-size: 20px;
-	color: red;
-	font-family: 'Press Start 2P', courier;
-}
-#youLose{
+#youWin, #youLose{
 	position:absolute;
 	width: 400px;
 	height: 100px;

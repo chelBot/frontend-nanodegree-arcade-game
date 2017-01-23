@@ -28,7 +28,7 @@ var Engine = (function(global) {
         loadCanvas = function() {
             canvas = document.createElement('canvas');
             ctx = canvas.getContext('2d')
-            //div = document.createElement('div'); 
+            //div = document.createElement('div');
             //div.id = "canvas";
             canvas.id     = "canvas";
             canvas.width  = 505;
@@ -137,24 +137,24 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-       
+
         var rowImagesHell = [
-            'images/hell-water-block.png', 
-            'images/hell-stone-block.png',  
-            'images/hell-stone-block.png',   
-            'images/hell-stone-block.png',   
-            'images/hell-stone-block.png',   
-            'images/hell-stone-block.png'   
-            
-         
+            'images/hell-water-block.png',
+            'images/hell-stone-block.png',
+            'images/hell-stone-block.png',
+            'images/hell-stone-block.png',
+            'images/hell-stone-block.png',
+            'images/hell-stone-block.png'
+
+
         ],
 
         rowImagesWin = [
-            'images/Dirt-Block.png',   
+            'images/Dirt-Block.png',
             'images/Stone-Block-Tall.png',
-            'images/Dirt-Block.png',    
-            'images/Dirt-Block.png',   
-            'images/Dirt-Block.png',   
+            'images/Dirt-Block.png',
+            'images/Dirt-Block.png',
+            'images/Dirt-Block.png',
             'images/Dirt-Block.png',
             'images/Door-Tall-Closed.png',
             'images/char-boy.png',
@@ -179,7 +179,7 @@ var Engine = (function(global) {
             // numRows = 6,
             // numCols = 5,
         row, col;
-       
+
 
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
@@ -216,13 +216,13 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImagesWin[6]), 2*101, 1*83);
             }
            else{
-                ctx.drawImage(Resources.get(rowImagesWin[8]), 2*101, 1*83);
+                ctx.drawImage(Resources.get(rowImagesWin[8]), 2*101, 1*83 - 20);
                 ctx.drawImage(Resources.get(rowImagesWin[7]), player.x + 80, player.y);
                 ctx.drawImage(Resources.get(rowImagesWin[9]), player.x +40, player.y - 50);
-                document.getElementById("youWin").innerHTML = "You Saved Char Boy! You Win.";
+                document.getElementById("youWin").innerHTML = "<br><br><br>You Saved Char Boy! <br><br> You Win.";
            }
         }
-        
+
          else{
             for (row = 0; row < numRows; row++) {
                 for (col = 0; col < numCols; col++) {
@@ -237,14 +237,13 @@ var Engine = (function(global) {
                 }
             }
         }
-      
+
         if(player.isDead && !player.hasLost){
             for(var i in deathTokens){
                 //deathTokens[i].render();
                 //console.log(deathTokens[i].x, deathTokens[i].y);
-                //TODO:
                 ctx.drawImage(Resources.get(deathTokens[i].sprite), deathTokens[i].x * 101, deathTokens[i].y * 83);
-            }   
+            }
         }
         //console.log(player.sprite);
 
@@ -260,22 +259,23 @@ var Engine = (function(global) {
          * the render function you have defined.
          */
         //if(player.sprite === "images/char-princess-girl.png"){
+        if(!player.hasLost && !player.isDead && keys[0] !== undefined){
+            keys[0].render();
+        }
         if(!player.hasLost && !player.hasKey){
             allEnemies.forEach(function(enemy) {
                 enemy.render();
             });
         }
-        if(!player.hasLost && !player.isDead && keys[0] !== undefined){
-            keys[0].render();
-        }
         if(player.hasLost){
             allHellBugs.forEach(function(hellBug) {
                 hellBug.render();
-                
+
             });
             reaper.render();
         }
-        if(player.isDead){
+        if(player.isDead && player.hasLost){
+            player.sprite = 'images/char-princess-girl-ghost.png';
             allEnemyGhosts.forEach(function(ghost) {
                 ghost.render();
             });
@@ -322,10 +322,6 @@ var Engine = (function(global) {
         'images/Stone-Block-Tall.png',
         'images/Door-Tall-Open.png',
         'images/Heart.png'
-
-
-
-
     ]);
     Resources.onReady(init);
 
@@ -335,4 +331,3 @@ var Engine = (function(global) {
      */
     global.ctx = ctx;
 })(this);
-

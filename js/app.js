@@ -1,6 +1,78 @@
 //this function should handle collisions.
 var deathTokens = [];
 var keys = [];
+var gem_audio = new Audio('http://opengameart.org/sites/default/files/Picked%20Coin%20Echo.wav');
+var key_audio = new Audio('http://opengameart.org/sites/default/files/Picked%20Coin%20Echo%202.wav');
+var hell_audio = new Audio('http://opengameart.org/sites/default/files/Forgoten_tombs_1.mp3');
+var door_audio = new Audio('http://opengameart.org/sites/default/files/Key%20Jiggle.wav');
+var win_audio = new Audio('http://opengameart.org/sites/default/files/Prototype%20Princess%20v1_01.wav');
+
+//********************************************************************************
+var collectibleLocs = [];
+//Death token class. Change Signature.
+var Collectible = function(x, y){
+    this.sprite = 'images/smiley_face.png';
+
+    //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
+    if(x && y){
+        this.x = x;
+        this.y = y;
+    }
+    else{
+        this.x = Math.floor((Math.random() * 5));
+        this.y = Math.floor((Math.random() * 3) + 2);
+        console.log("INITIAL LOCS: " + this.x, this.y);
+
+        //****Should this be a helper fct outside of this scope?***
+        var isInArray = function(array,item){
+            for(var i in array){
+                if(array[i][0] === item[0] && array[i][1] === item[1]){
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        //If location is in the collectibleLocs, pick new coordinates.
+        while(isInArray(collectibleLocs,[this.x, this.y])){
+            this.x = Math.floor((Math.random() * 5));
+            this.y = Math.floor((Math.random() * 3) + 2);
+        }
+    }
+    collectibleLocs.push([this.x, this.y]);
+    //console.log("token array " + collectibleLocs);
+    this.collected = false;
+};
+
+//NOT being used yet. Will refactor
+Collectible.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+
+var DeathToken = function(x, y){
+    Collectible.call(this, x, y);
+    //TODO: explore if I want this within constructor or outside.
+    this.sprite = 'images/gemBlueSml.png';
+};
+DeathToken.prototype = Object.create(Collectible.prototype);
+DeathToken.prototype.constructor = DeathToken;
+
+//*************TODO: figure out why positioning isn't working correctly************
+var key = new Collectible( 2*101, 1*83);
+console.log("key.x" + key.x);
+console.log("key.y" + key.y);
+
+
+key.sprite = 'images/KeySml.png';
+keys.push(key);
+
+//****************************************************************************
+
+// Collectible.prototype.render = function() {
+//     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+// };
+
 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed, color) {
@@ -8,7 +80,7 @@ var Enemy = function(x, y, speed, color) {
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+    // a helper to easily load images
     this.sprite = 'images/' + (color || 'enemy') + '-bug.png';
     this.speed = speed;
     this.x = x;
@@ -23,7 +95,7 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     if(this.x > 500){
-        this.x = this.initialX;
+        this.x = 0 - 5*this.sprite.length;
     }
     else{
         this.x = this.x + this.speed*dt;
@@ -69,49 +141,6 @@ Reaper.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-//********************************************************************************
-var collectibleLocs = [];
-//Death token class. Change Signature.
-var Collectible = function(x, y){
-    this.sprite = 'images/smiley_face.png';
-
-    //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
-    if(x && y){
-        this.x = x;
-        this.y = y;
-    }
-    else{
-        this.x = Math.floor((Math.random() * 5));
-        this.y = Math.floor((Math.random() * 3) + 2);
-        console.log("INITIAL LOCS: " + this.x, this.y);
-
-        //****Should this be a helper fct outside of this scope?***
-        var isInArray = function(array,item){
-            for(var i in array){
-                if(array[i][0] === item[0] && array[i][1] === item[1]){
-                    return true;
-                }
-            }
-            return false;
-        };
-    
-        //If location is in the collectibleLocs, pick new coordinates.
-        while(isInArray(collectibleLocs,[this.x, this.y])){
-            this.x = Math.floor((Math.random() * 5));
-            this.y = Math.floor((Math.random() * 3) + 2);
-        }
-    }
-    collectibleLocs.push([this.x, this.y]);
-    //console.log("token array " + collectibleLocs);
-    this.collected = false;
-};
-
-//NOT being used yet. Will refactor
-Collectible.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
-
-
 var DeathToken = function(x, y){
     Collectible.call(this, x, y);
     //TODO: explore if I want this within constructor or outside.
@@ -122,28 +151,33 @@ DeathToken.prototype.constructor = DeathToken;
 
 //*************TODO: figure out why positioning isn't working correctly************
 var key = new Collectible( 2*101, 1*83);
+console.log("key.x" + key.x);
+console.log("key.y" + key.y);
+
+
 key.sprite = 'images/KeySml.png';
 keys.push(key);
 
 //****************************************************************************
-var count = 10;
+var count = 9;
+var time_variable;
 var timer = function(){
-    setInterval(myTimer, 1000);
+    time_variable = setInterval(myTimer, 1000);
 }
 var myTimer = function() {
     if(count >= 0){
         document.getElementById("fatherTime").innerHTML = count;
     }
     else{
-
-        document.getElementById("youLose").innerHTML = "You Die!"; 
+        hell_audio.play();
+        document.getElementById("youLose").innerHTML = "Your Time is Up! <br><br> Game Over.";
         player.hasLost = true;
         stopTimer();
     }
      count--;
 }
 var stopTimer = function(){
-    clearInterval(timer);
+    clearInterval(time_variable);
 }
 //****************************************************************************
 
@@ -170,8 +204,9 @@ var Player = function(x, y){
     this.initialX = x;
     this.initialY = y;
     this.deathTokens = 0;
-    
+
     this.hasKey = false;
+    this.prisonSceneFlag = false;
     this.hasWon = false;
     this.hasLost = false;
 
@@ -179,9 +214,9 @@ var Player = function(x, y){
 
 Player.prototype.update = function(dt){
     for(var i in allEnemies){
-        //TODO: Use the actual dimension of bug instead of hardcoding 55. 
+        //TODO: Use the actual dimension of bug instead of hardcoding 55.
         //Check for bug collisons.
-        if((this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55) 
+        if((this.x >= allEnemies[i].x -55 && this.x <= allEnemies[i].x + 55) && (this.y >= allEnemies[i].y - 55 && this.y <= allEnemies[i].y + 55)
             && !this.isDead){
             this.isDead = true;
             this.setIsDead(this.isDead);
@@ -193,38 +228,51 @@ Player.prototype.update = function(dt){
             var deathToken3 = new DeathToken();
             deathTokens.push(deathToken1);
             deathTokens.push(deathToken2);
-            deathTokens.push(deathToken3); 
+            deathTokens.push(deathToken3);
         }
     }
     if(!player.hasLost && !player.isDead){
-        if((this.x >= (key.x - 20)  && this.x <= (key.x) + 20) && (this.y >= (key.y -20)  && this.y <= (key.y + 20))){    
-               console.log(key.x, key.y);
+      //Define target zone for key
+        if( (this.x + 101/2) >= (key.x + 43/2 - 20)  && (this.x + 101/2) <= (key.x + 43/2 + 20) && (this.y + 171/2) <= (key.y + 73/2 + 10)){
+               key_audio.play();
                this.hasKey = true;
-               delete keys[0]; 
+               this.prisonSceneFlag = true;
+               delete keys[0];
         }
     }
     if(player.hasKey){
+        if(player.prisonSceneFlag){
+          this.x = this.initialX;
+          this.y = this.initialY;
+          this.prisonSceneFlag = false;
+        }
+
         for(var i in allEnemies){
             delete allEnemies[i];
         }
-        if((this.x >= 2*101 - 50 && this.x <= 3*101 -100) && (this.y <= 1*83 + 50)){
+        //Define target zone for door which frees Char Boy.
+        if(((this.x + 101/2) >= (101*2) && (this.x + 101/2) <= (101*3)) && ((this.y) <= (130))){
+            door_audio.play();
+            door_audio.volume= 1;
             this.hasWon = true;
+            win_audio.play();
+            win_audio.volume = 0.1;
         }
     }
 
-    //Handle ghost-girls collection of death tokens and death timer. 
+    //Handle ghost-girls collection of death tokens and death timer.
     if(this.isDead) {
         this.deathAlert++;
         if(this.deathAlert === 1){
             myTimer();
             timer();
         }
-        for(var i in allEnemyGhosts){
-            if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
-                this.x = this.initialX;
-                this.y = this.initialY;
-            }
-        }
+        // for(var i in allEnemyGhosts){
+        //     if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
+        //         this.x = this.initialX;
+        //         this.y = this.initialY;
+        //     }
+        // }
         if(this.hasLost){
             for(var i in allHellBugs){
                 if((this.x >= allHellBugs[i].x -55 && this.x <= allHellBugs[i].x + 55) && (this.y >= allHellBugs[i].y - 55 && this.y <= allHellBugs[i].y + 55)){
@@ -239,20 +287,21 @@ Player.prototype.update = function(dt){
             // console.log(i + " " +  (101* deathTokens[i].x));
             // console.log('spriteX: ' + this.x);
             //*****Want tokens coordinates to be the same as sprite coordinates!!
-            
-            if((this.x >= (101*deathTokens[i].x - 20)  && this.x <= (101*deathTokens[i].x) + 20) && (this.y >= (83 *deathTokens[i].y -20)  && this.y <= (83*deathTokens[i].y + 20))){
+            //define token target zone for deathTokens
+            if(((this.x + 101/2) >= (101*deathTokens[i].x + 30/2 - 30)  && (this.x + 101/2) <= (101*deathTokens[i].x +30/2) + 30)
+            && ((this.y + 171/2) >= (83 *deathTokens[i].y + 52/2 - 60) && ((this.y + 171/2) <= (83*deathTokens[i].y + 52/2 + 20)))){
                 this.deathTokens++;
+                // gem_audio.play();
                 delete deathTokens[i];
-                //console.log("hi");
             }
         }
 
         if(this.deathTokens === 3){
             this.isDead = false;
-            this.setIsDead(this.isDead); 
+            this.setIsDead(this.isDead);
             this.deathTokens = 0;
         }
-       
+
     }
     if(count === -1){
         this.hasLost = true;
@@ -262,24 +311,23 @@ Player.prototype.update = function(dt){
     }
     if(!this.isDead){
         this.deathAlert = 0;
-        count = 10;
+        count = 9;
         document.getElementById("fatherTime").innerHTML = "";
 
     }
 
-    //console.log("num of tokens: " + this.deathTokens); 
+    //console.log("num of tokens: " + this.deathTokens);
 
 };
 
 console.log(deathTokens);
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    //ctx.drawImage(Resources.get('images/reaperGhost.png'), this.initialX, this.initialY);
 };
 
 
 Player.prototype.handleInput = function(input) {
-    var tempX = this.x; 
+    var tempX = this.x;
     var tempY = this.y;
     if(input === 'left'){
         tempX -= 20;
@@ -287,7 +335,7 @@ Player.prototype.handleInput = function(input) {
     else if(input === 'right'){
         tempX += 20;
     }
-    
+
     if(input === 'up'){
         tempY -= 20;
     }
@@ -328,8 +376,10 @@ var ghostBug2 = new GhostEnemy(0, 100, 25, 'blue-ghost');
 var ghostBug3 = new GhostEnemy(0, 250, 10, 'blue-ghost');
 var ghostBug4 = new GhostEnemy(0, 150, 50, 'blue-ghost');
 var ghostBug5 = new GhostEnemy(0, 50, 32, 'blue-ghost');
+var ghostBug5 = new GhostEnemy(0, 350, 72, 'blue-ghost');
 
 var allEnemyGhosts = [ghostBug1, ghostBug2, ghostBug3, ghostBug4, ghostBug5];
+
 
 var hellBug1 = new HellBug(0, 100, 50, 'hell');
 var hellBug2 = new HellBug(0, 50, 20, 'hell');
@@ -345,7 +395,7 @@ var hellBug11 = new HellBug(10, 370, 100, 'hell');
 var hellBug12 = new HellBug(20, 270, 10, 'hell');
 var hellBug13 = new HellBug(30, 370, 15, 'hell');
 var hellBug14 = new HellBug(10, 280, 15, 'hell');
-var hellBug15 = new HellBug(0, 447, 50, 'hell');
+var hellBug15 = new HellBug(0, 430, 50, 'hell');
 var hellBug16 = new HellBug(0, 19, 60, 'hell');
 var hellBug17 = new HellBug(0, 40, 18, 'hell');
 var hellBug18 = new HellBug(0, 100, 19, 'hell');
@@ -354,6 +404,7 @@ var hellBug19 = new HellBug(0, 300, 70, 'hell');
 var allHellBugs = [hellBug1, hellBug2, hellBug3, hellBug4, hellBug5, hellBug6, hellBug7, hellBug8, hellBug9, hellBug10, hellBug11, hellBug12, hellBug13, hellBug14, hellBug15, hellBug16, hellBug17, hellBug18, hellBug19];
 
 var player = new Player(10, 400);
+
 
 var reaper = new Reaper(90, 400);
 
@@ -369,39 +420,3 @@ document.addEventListener('keyup', function(e) {
     };
     player.handleInput(allowedKeys[e.keyCode]);
 });
-
-
-
-// if(player.isDead){
-//     timer();
-// }
-
-// var time = Date.now();
-// var running = setInterval(run, 10); // Save this so we can clear/cancel it later
-
-// setTimeout(function() {        // Set a timer
-//   clearInterval(running);      // Stop the running loop
-//   alert('Game over!');         // Let the user know, do other stuff here
-// }, 30000); 
-
-// var timer;
-// var output;
-// var game;
-
-// function init(){
-//     game = new Scene();
-//     output = document.getElementById("output");
-//     timer = new Timer();
-//     timer.reset();
-//     game.start();
-// } // end init
-
-// function update(){
-//     game.hide();
-//     currentTime = timer.getElapsedTime();
-//     output.innerHTML = currentTime;
-// } // end update
-
-// function reset(){
-//     timer.reset();
-// } 
