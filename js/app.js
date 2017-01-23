@@ -12,8 +12,6 @@ var collectibleLocs = [];
 //Death token class. Change Signature.
 var Collectible = function(x, y){
     this.sprite = 'images/smiley_face.png';
-
-    //TODO: The hardcored numbers here keep the death tokens within the zone region. Fix the board.
     if(x && y){
         this.x = x;
         this.y = y;
@@ -68,11 +66,6 @@ key.sprite = 'images/KeySml.png';
 keys.push(key);
 
 //****************************************************************************
-
-// Collectible.prototype.render = function() {
-//     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-// };
-
 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed, color) {
@@ -160,24 +153,23 @@ keys.push(key);
 
 //****************************************************************************
 var count = 9;
-var time_variable;
+var countdownInterval;
 var timer = function(){
-    time_variable = setInterval(myTimer, 1000);
+    countdownInterval = setInterval(myTimer, 1000);
 }
 var myTimer = function() {
-    if(count >= 0){
-        document.getElementById("fatherTime").innerHTML = count;
-    }
-    else{
+    count--;
+    console.log('timer count', count);
+    document.getElementById("fatherTime").innerHTML = count;
+    if(count <= 0){
         hell_audio.play();
         document.getElementById("youLose").innerHTML = "Your Time is Up! <br><br> Game Over.";
         player.hasLost = true;
         stopTimer();
     }
-     count--;
 }
 var stopTimer = function(){
-    clearInterval(time_variable);
+    clearInterval(countdownInterval);
 }
 //****************************************************************************
 
@@ -264,15 +256,8 @@ Player.prototype.update = function(dt){
     if(this.isDead) {
         this.deathAlert++;
         if(this.deathAlert === 1){
-            myTimer();
             timer();
         }
-        // for(var i in allEnemyGhosts){
-        //     if((this.x >= allEnemyGhosts[i].x -55 && this.x <= allEnemyGhosts[i].x + 55) && (this.y >= allEnemyGhosts[i].y - 55 && this.y <= allEnemyGhosts[i].y + 55)){
-        //         this.x = this.initialX;
-        //         this.y = this.initialY;
-        //     }
-        // }
         if(this.hasLost){
             for(var i in allHellBugs){
                 if((this.x >= allHellBugs[i].x -55 && this.x <= allHellBugs[i].x + 55) && (this.y >= allHellBugs[i].y - 55 && this.y <= allHellBugs[i].y + 55)){
@@ -281,8 +266,6 @@ Player.prototype.update = function(dt){
                 }
             }
         }
-
-
         for(var i in deathTokens){
             // console.log(i + " " +  (101* deathTokens[i].x));
             // console.log('spriteX: ' + this.x);
@@ -300,14 +283,15 @@ Player.prototype.update = function(dt){
             this.isDead = false;
             this.setIsDead(this.isDead);
             this.deathTokens = 0;
+            stopTimer();
         }
 
     }
-    if(count === -1){
+    if(count <= 0){
         this.hasLost = true;
         this.isDead = true;
 
-        console.log("dead");
+        console.log("dead", count);
     }
     if(!this.isDead){
         this.deathAlert = 0;
@@ -315,9 +299,6 @@ Player.prototype.update = function(dt){
         document.getElementById("fatherTime").innerHTML = "";
 
     }
-
-    //console.log("num of tokens: " + this.deathTokens);
-
 };
 
 console.log(deathTokens);
